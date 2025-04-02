@@ -1,5 +1,8 @@
 const readlineSync = require("readline-sync");
 export const choices: string[] = ["가위", "바위", "보"];
+let recentChoice: number[] = [];  
+let max = 5;
+let min = 3;
 
 function main(): void {
   let isPlaying = true;
@@ -28,8 +31,14 @@ function main(): void {
       process.stdout.write("가위(1), 바위(2), 보(3) 중 하나를 선택하세요 : ");
       
       const userChoice = parseInt(readlineSync.question(""));
+
+      recentChoice.push(userChoice);
+
+      if(recentChoice.length > max) {
+        recentChoice.shift(); 
+      }
+
       const computerChoice = randomChoice();
-  
       console.log(`컴퓨터: ${choices[computerChoice - 1]} (${computerChoice})`);
 
       const result = determineWinner(userChoice, computerChoice);
@@ -39,9 +48,9 @@ function main(): void {
       } else if(result === "패배!"){
         computerWins++;
       }
-
       console.log(`결과: ${result}(${userWins}:${computerWins})\n`);
 
+      checkPattern();
     }
     
     if(userWins == 2){
@@ -68,6 +77,24 @@ function determineWinner(userChoice: number, computerChoice: number): string {
     return "승리!";
   }
   return "패배!";
+}
+
+function checkPattern () : void {
+  if(recentChoice.length < min){
+    return;
+  }
+
+  const frequency : Record <number, number> = {1 : 0, 2 : 0, 3 : 0};
+
+  recentChoice.forEach((choice) => {
+    frequency[choice]++
+  });
+
+  for(const [choice, count] of Object.entries(frequency)){
+    if(count >= 3) {
+      console.log(`AI가 패턴을 감지했습니다: 당신은 '${choices[parseInt(choice) - 1]}(${choice})'를 자주 선택합니다.\n`)
+    }
+  }
 }
 
 main(); 
